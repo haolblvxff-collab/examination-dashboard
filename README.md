@@ -3,7 +3,7 @@
 > Examination Dashboard — 本地成绩分析工具
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.57+-red.svg)](https://streamlit.io)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.136+-green.svg)](https://fastapi.tiangolo.com)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
@@ -34,10 +34,16 @@
 
 ```bash
 pip install -r requirements-win.txt
-streamlit run app.py
+python app.py
 ```
 
-浏览器访问 `http://localhost:8501`
+浏览器访问 `http://localhost:8899`
+
+或使用桌面启动器：
+
+```bash
+python launcher.py    # 自动打开浏览器
+```
 
 ---
 
@@ -57,9 +63,17 @@ streamlit run app.py
 
 ## 🏗️ 技术栈
 
-- **Streamlit** — Web UI 框架
-- **Pandas** — 数据处理
-- **Plotly** — 交互式图表
+- **FastAPI** — Web 框架 + REST API
+- **Pandas / NumPy** — 数据处理
+- **Matplotlib / Seaborn** — 图表生成
+- **OpenPyXL** — Excel 读写
+
+## 📦 构建
+
+```bash
+pip install pyinstaller
+pyinstaller build.spec
+```
 
 ---
 
