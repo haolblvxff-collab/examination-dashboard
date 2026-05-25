@@ -41,16 +41,16 @@ def main():
         time.sleep(0.1)
 
     url = f"http://{HOST}:{PORT}"
-    print(f"\n  📊 运城培优成绩追踪看板")
-    print(f"  📍 {url}")
-    print(f"  🛑 关闭此窗口即可停止服务\n")
+    print("\n  运城培优成绩追踪看板")
+    print(f"  地址: {url}")
+    print("  关闭此窗口即可停止服务\n")
     webbrowser.open(url)
 
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\n  👋 服务已停止")
+        print("\n  服务已停止")
         server.should_exit = True
 
 if __name__ == "__main__":

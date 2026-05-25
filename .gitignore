@@ -1,5 +1,8 @@
 dist/
 build/
+.venv/
+artifacts/
+tests/*.xlsx
 __pycache__/
 *.pyc
 .DS_Store
