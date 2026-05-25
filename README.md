@@ -72,14 +72,5 @@ python launcher.py    # 自动打开浏览器
 
 ```bash
 pip install pyinstaller
-pyinstaller build.spec
-```
-
----
-
-## 📦 构建
-
-```bash
-pip install pyinstaller
 pyinstaller --onefile --windowed --name "运城培优成绩追踪" app.py
 ```
