@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>运城培优 · 成绩追踪看板</title>
+<style>
+:root{--bg:#0b1120;--card:#111827;--card2:#1a2332;--border:#1e293b;--text:#e2e8f0;--dim:#64748b;--accent:#3b82f6;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--purple:#8b5cf6;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+a{color:var(--accent);text-decoration:none}
+header{background:linear-gradient(135deg,#0f1d3a 0%,#15294d 40%,#1a3a6b 100%);border-bottom:1px solid var(--border);padding:22px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+header h1{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px}
+header .sub{font-size:12px;color:var(--dim);margin-top:2px}
+header .badge{background:rgba(16,185,129,0.15);color:var(--green);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+header .status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim)}
+header .status .dot{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+header .status .dot.ok{background:var(--green)}
+.container{max-width:1400px;margin:0 auto;padding:0 24px}
+.upload-section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-top:20px;padding:20px 28px;display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.upload-left{flex:1;min-width:240px}
+.upload-left h3{font-size:13px;color:var(--dim);letter-spacing:0.5px;margin-bottom:6px}
+.drop-zone{background:var(--card2);border:2px dashed #334155;border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:.2s}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--accent);background:#1a2740}
+.drop-zone input{display:none}
+.drop-zone .icon{font-size:32px;margin-bottom:6px}
+.drop-zone .text{font-size:13px;color:var(--dim)}
+.drop-zone .text b{color:var(--accent)}
+.upload-right{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:130px}
+.btn{background:var(--accent);color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(1.15)}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--dim)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.file-info{display:none;margin-top:10px;font-size:12px;color:var(--green)}
+.file-info.show{display:block}
+.file-info .err{color:var(--red)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;transition:.2s;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.stat-card .label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:0.5px}
+.stat-card .value{font-size:28px;font-weight:800;margin-top:2px}
+.stat-card .sub{font-size:11px;color:var(--dim);margin-top:2px}
+.sc1::before{background:var(--green)}.sc1 .value{color:var(--green)}
+.sc2::before{background:var(--accent)}.sc2 .value{color:var(--accent)}
+.sc3::before{background:var(--amber)}.sc3 .value{color:var(--amber)}
+.sc4::before{background:var(--purple)}.sc4 .value{color:var(--purple)}
+.sc5::before{background:var(--red)}.sc5 .value{color:var(--red)}
+.sc6::before{background:#06b6d4}.sc6 .value{color:#06b6d4}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:20px 0 16px;background:var(--card);border-radius:var(--radius);padding:4px;border:1px solid var(--border)}
+.tab{padding:8px 18px;border-radius:10px;font-size:13px;cursor:pointer;color:var(--dim);transition:.15s;font-weight:500;border:none;background:none}
+.tab:hover{color:var(--text);background:var(--card2)}
+.tab.active{background:var(--accent);color:#fff;font-weight:600}
+.chart-panel{display:none}
+.chart-panel.active{display:block}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;overflow:hidden}
+.chart-card.full{grid-column:1/-1}
+.chart-card h3{font-size:14px;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.chart-card h3::before{content:'';display:inline-block;width:4px;height:14px;background:var(--accent);border-radius:2px}
+.chart-card img{width:100%;border-radius:8px;display:block}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.filter-row label{font-size:12px;color:var(--dim)}
+.filter-row select,.filter-row input{padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-size:13px;outline:none}
+.filter-row select:focus,.filter-row input:focus{border-color:var(--accent)}
+.fbtn{padding:6px 14px;border:1.5px solid var(--border);border-radius:24px;font-size:12px;cursor:pointer;background:var(--card2);color:var(--dim);transition:.15s;font-weight:500}
+.fbtn:hover{border-color:var(--accent);color:var(--accent)}
+.fbtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.table-wrap{overflow-x:auto;max-height:500px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--card2);color:var(--dim);font-weight:600;padding:8px 10px;text-align:center;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1}
+tbody tr:nth-child(even){background:rgba(255,255,255,.02)}
+tbody tr:hover{background:rgba(59,130,246,.08)}
+td{padding:7px 10px;text-align:center;border-bottom:1px solid rgba(30,41,59,.5)}
+td.name{text-align:left;font-weight:600;color:var(--text)}
+td.school{font-size:11px;color:var(--dim)}
+.empty-state{text-align:center;padding:40px;color:var(--dim);font-size:14px}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+footer{padding:20px 32px;text-align:center;color:var(--dim);font-size:11px;border-top:1px solid var(--border);margin-top:24px}
+@media(max-width:768px){.chart-grid{grid-template-columns:1fr}.upload-section{flex-direction:column}header{padding:16px}.stats-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+<div><h1>📊 运城培优 · 成绩追踪看板 <span class="badge">Python 驱动</span></h1><div class="sub">上传 Excel → 自动分析 · 多学校/多场次 · Python 数据处理与可视化</div></div>
+<div class="status"><span class="dot" id="statusDot"></span><span id="statusText">等待上传数据</span></div>
+</header>
+<div class="container">
+<div class="upload-section">
+<div class="upload-left">
+<h3>📂 上传成绩文件</h3>
+<div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+<input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleUpload(this.files[0])">
+<div class="icon">📄</div><div class="text">点击选择文件 或 拖拽到此处<br><b>.xlsx / .xls</b></div>
+</div>
+<div class="file-info" id="fileInfo"></div>
+</div>
+<div class="upload-right">
+<div style="font-size:36px">📈</div><div style="font-size:12px;color:var(--dim)">上传即分析</div>
+<button class="btn-outline" onclick="downloadTemplate()" style="margin-top:4px">⬇ 下载录入模板</button>
+</div>
+</div>
+<div class="stats-grid">
+<div class="stat-card sc1"><div class="label">参考人数</div><div class="value" id="sN">—</div><div class="sub">人</div></div>
+<div class="stat-card sc2"><div class="label">最高总分</div><div class="value" id="sMax">—</div><div class="sub" id="sMaxN"></div></div>
+<div class="stat-card sc3"><div class="label">全校均分</div><div class="value" id="sAvg">—</div><div class="sub" id="sAvgSub"></div></div>
+<div class="stat-card sc4"><div class="label">学校数量</div><div class="value" id="sSchool">—</div><div class="sub">所</div></div>
+<div class="stat-card sc5"><div class="label">考试场次</div><div class="value" id="sExam">—</div><div class="sub">场</div></div>
+<div class="stat-card sc6"><div class="label">进步最大</div><div class="value" id="sImprove">—</div><div class="sub" id="sImpN"></div></div>
+</div>
+<div class="tabs">
+<button class="tab active" onclick="switchTab('overview',event)">📊 总览图表</button>
+<button class="tab" onclick="switchTab('detail',event)">🔍 详细分析</button>
+<button class="tab" onclick="switchTab('ranking',event)">🏆 成绩排名</button>
+</div>
+<div class="chart-panel active" id="panel-overview"><div class="chart-grid">
+<div class="chart-card full"><h3>📈 成绩走势</h3><div class="filter-row">
+<button class="fbtn active" onclick="setTrendView('exam',event)">总体均分</button><button class="fbtn" onclick="setTrendView('subject',event)">按科目</button><button class="fbtn" onclick="setTrendView('student',event)">按学生</button><button class="fbtn" onclick="setTrendView('school',event)">按学校</button>
+<select id="trendSubject" style="display:none" onchange="refreshTrend()"><option value="">全科</option><option>语文</option><option>数学</option><option>英语</option><option>物理</option><option>化学</option><option>生物</option></select>
+<select id="trendStudent" style="display:none" onchange="refreshTrend()"><option value="">请选择学生</option></select>
+<select id="trendSchool" style="display:none" onchange="refreshTrend()"><option value="">全部学校</option></select>
+<select id="trendSchoolStu" style="display:none" onchange="refreshTrend()"><option value="">全部学生</option></select>
+</div><img id="chartTrend" src="" onerror="this.style.display='none'" style="display:none"><div class="empty-state" id="trendEmpty"><div class="icon">📊</div>请先上传成绩文件</div></div>
+<div class="chart-card"><h3>📊 学校对比</h3><div class="filter-row"><label>考试：</label><select id="cmpExam" onchange="refreshComparison()"></select></div><img id="chartCmp" src="" onerror="this.style.display='none'" style="display:none"><div class="empty-state" id="cmpEmpty">请先上传成绩文件</div></div>
+<div class="chart-card"><h3>📈 进步追踪</h3><img id="chartImprove" src="" onerror="this.style.display='none'" style="display:none"><div class="empty-state" id="improveEmpty">需要至少2场考试</div></div>
+</div></div>
+<div class="chart-panel" id="panel-detail"><div class="chart-grid">
+<div class="chart-card full"><h3>📊 分数分布</h3><div class="filter-row"><label>考试：</label><select id="distExam" onchange="refreshDistribution()"></select><label>科目：</label><select id="distSubject" onchange="refreshDistribution()"><option value="">全科</option><option>语文</option><option>数学</option><option>英语</option><option>物理</option><option>化学</option><option>生物</option></select></div><img id="chartDist" src="" onerror="this.style.display='none'" style="display:none"><div class="empty-state" id="distEmpty">请先上传成绩文件</div></div>
+<div class="chart-card"><h3>📦 箱线图</h3><div class="filter-row"><label>考试：</label><select id="boxExam" onchange="refreshBoxplot()"></select></div><img id="chartBox" src="" onerror="this.style.display='none'" style="display:none"><div class="empty-state" id="boxEmpty">请先上传成绩文件</div></div>
+<div class="chart-card"><h3>🎯 学科雷达</h3><div class="filter-row"><label>学生：</label><select id="radarStudent" onchange="refreshRadar()"></select><label>考试：</label><select id="radarExam" onchange="refreshRadar()"></select></div><img id="chartRadar" src="" onerror="this.style.display='none'" style="display:none"><div class="empty-state" id="radarEmpty">请先上传成绩文件</div></div>
+<div class="chart-card full"><h3>🔥 成绩热力图</h3><div class="filter-row"><label>考试：</label><select id="heatExam" onchange="refreshHeatmap()"></select></div><img id="chartHeat" src="" onerror="this.style.display='none'" style="display:none"><div class="empty-state" id="heatEmpty">请先上传成绩文件</div></div>
+</div></div>
+<div class="chart-panel" id="panel-ranking"><div class="chart-card"><h3>🏆 成绩排名</h3><div class="filter-row" style="margin-bottom:14px"><label>考试：</label><select id="rankExam" onchange="loadRanking()"></select><label>学校：</label><select id="rankSchool" onchange="loadRanking()"><option value="">全部学校</option></select></div><div class="table-wrap"><table><thead><tr><th>#</th><th>姓名</th><th>学校</th><th>语文</th><th>数学</th><th>英语</th><th>物理</th><th>化学</th><th>生物</th><th>总分</th></tr></thead><tbody id="rankBody"><tr><td colspan="10" class="empty-state" style="padding:30px">请先上传成绩文件</td></tr></tbody></table></div></div></div>
+</div>
+<footer>运城培优成绩追踪看板 · Python FastAPI + Matplotlib · 数据不上传服务器，本地处理</footer>
+<script>
+let exams=[],schools=[],students={},trendView='exam';
+function handleUpload(file){if(!file)return;let info=document.getElementById('fileInfo');info.className='file-info';info.textContent='解析中...';let form=new FormData();form.append('file',file);fetch('/api/upload',{method:'POST',body:form}).then(r=>r.json()).then(d=>{if(!d.ok){info.innerHTML='<span class="err">❌ '+d.error+'</span>';info.className='file-info show';return}info.textContent='✅ '+d.students+'人 · '+d.exams+'场 · '+d.schools+'校 — '+(d.filename||'');info.className='file-info show';document.getElementById('statusDot').className='dot ok';document.getElementById('statusText').textContent='数据已加载';loadAll()}).catch(e=>{info.innerHTML='<span class="err">❌ 上传失败: '+e.message+'</span>';info.className='file-info show'})}
+function loadAll(){fetch('/api/data').then(r=>r.json()).then(d=>{if(!d.ok)return;students=d.students;exams=d.exams;schools=d.schools;populateSelects();loadStats();refreshTrend();refreshComparison();refreshImprovement();refreshDistribution();refreshBoxplot();refreshRadar();refreshHeatmap();loadRanking()})}
+function loadStats(){fetch('/api/stats').then(r=>r.json()).then(d=>{document.getElementById('sN').textContent=d.n_students||'—';document.getElementById('sMax').textContent=d.max_total||'—';document.getElementById('sMaxN').textContent=d.max_name||'';document.getElementById('sAvg').textContent=d.avg_total||'—';let sa=d.subject_avg||{};document.getElementById('sAvgSub').textContent=sa?Object.entries(sa).map(([k,v])=>k+v).join(' '):'';document.getElementById('sSchool').textContent=d.n_schools||'—';document.getElementById('sExam').textContent=d.n_exams||'—';document.getElementById('sImprove').textContent=d.best_improve>0?'+'+d.best_improve:'—';document.getElementById('sImpN').textContent=d.best_improve_info||''}).catch(()=>{})}
+function populateSelects(){['trendStudent','trendSchoolStu','radarStudent'].forEach(id=>{let sel=document.getElementById(id);sel.innerHTML='<option value="">'+(id.includes('Student')?'请选择学生':'全部学生')+'</option>';Object.keys(students).sort().forEach(n=>sel.innerHTML+='<option>'+n+'</option>')});['trendSchool','rankSchool'].forEach(id=>{let sel=document.getElementById(id);sel.innerHTML='<option value="">全部学校</option>';schools.forEach(s=>sel.innerHTML+='<option>'+s+'</option>')});['trendExam','cmpExam','distExam','boxExam','radarExam','heatExam','rankExam'].forEach(id=>{let sel=document.getElementById(id);if(sel)sel.innerHTML=exams.map(e=>'<option>'+e+'</option>').join('')});if(exams.length){['radarExam','heatExam','cmpExam','distExam','boxExam'].forEach(id=>{let sel=document.getElementById(id);if(sel&&sel.options.length)sel.value=exams[exams.length-1]});let rankSel=document.getElementById('rankExam');if(rankSel&&rankSel.options.length)rankSel.value=exams[exams.length-1]}}
+function switchTab(tab,evt){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));(evt||event).target.classList.add('active');document.querySelectorAll('.chart-panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+tab).classList.add('active')}
+function setTrendView(v,evt){trendView=v;document.querySelectorAll('#panel-overview .fbtn').forEach(b=>b.classList.remove('active'));(evt||event).target.classList.add('active');document.getElementById('trendSubject').style.display=v==='subject'?'':'none';document.getElementById('trendStudent').style.display=v==='student'?'':'none';document.getElementById('trendSchool').style.display=v==='school'?'':'none';document.getElementById('trendSchoolStu').style.display=v==='school'?'':'none';if(v==='student'){let s=document.getElementById('trendStudent');if(!s.value&&s.options.length>1){s.value=s.options[1].value}}if(v==='school'){let sc=document.getElementById('trendSchool');if(!sc.value&&sc.options.length>1)sc.value=sc.options[1].value}refreshTrend()}
+function refreshTrend(){if(!exams.length)return;let sub=document.getElementById('trendSubject').value,stu=document.getElementById('trendStudent').value,sch=document.getElementById('trendSchool').value,schStu=document.getElementById('trendSchoolStu').value;let url='/api/chart/trend?view='+trendView+'&subject='+encodeURIComponent(sub)+'&student='+encodeURIComponent(stu)+'&school='+encodeURIComponent(sch)+'&school_student='+encodeURIComponent(schStu);loadChartImg('chartTrend',url,'trendEmpty')}
+function refreshComparison(){let exam=document.getElementById('cmpExam').value||(exams[exams.length-1]||'');loadChartImg('chartCmp','/api/chart/comparison?exam='+exam,'cmpEmpty')}
+function refreshImprovement(){loadChartImg('chartImprove','/api/chart/improvement','improveEmpty')}
+function refreshDistribution(){let exam=document.getElementById('distExam').value||(exams[exams.length-1]||''),sub=document.getElementById('distSubject').value;loadChartImg('chartDist','/api/chart/distribution?exam='+exam+'&subject='+sub,'distEmpty')}
+function refreshBoxplot(){let exam=document.getElementById('boxExam').value||(exams[exams.length-1]||'');loadChartImg('chartBox','/api/chart/boxplot?exam='+exam,'boxEmpty')}
+function refreshRadar(){let stu=document.getElementById('radarStudent').value,exam=document.getElementById('radarExam').value||(exams[exams.length-1]||'');if(!stu){document.getElementById('chartRadar').style.display='none';document.getElementById('radarEmpty').style.display='';return}loadChartImg('chartRadar','/api/chart/radar?student='+stu+'&exam='+exam,'radarEmpty')}
+function refreshHeatmap(){let exam=document.getElementById('heatExam').value||(exams[exams.length-1]||'');loadChartImg('chartHeat','/api/chart/heatmap?exam='+exam,'heatEmpty')}
+function loadChartImg(imgId,url,emptyId){let img=document.getElementById(imgId),empty=document.getElementById(emptyId);img.style.display='none';if(empty)empty.style.display='';fetch(url).then(r=>{if(!r.ok)throw new Error('fail');return r.blob()}).then(blob=>{let reader=new FileReader();reader.onload=function(){img.src=reader.result;img.style.display='';if(empty)empty.style.display='none';img.onerror=null};reader.readAsDataURL(blob)}).catch(()=>{if(empty)empty.style.display='';img.style.display='none'})}
+function loadRanking(){let exam=document.getElementById('rankExam').value||(exams[exams.length-1]||''),school=document.getElementById('rankSchool').value,tbody=document.getElementById('rankBody');if(!exam){tbody.innerHTML='<tr><td colspan="10" style="color:var(--dim);padding:30px">请先上传成绩文件</td></tr>';return}fetch('/api/ranking?exam='+exam+'&school='+school).then(r=>r.json()).then(d=>{let ranking=d.ranking||[],html='';ranking.forEach((r,i)=>{html+='<tr><td><b style="color:var(--accent)">'+(i+1)+'</b></td><td class="name">'+r.name+'</td><td class="school">'+(r.school||'—')+'</td>';['语文','数学','英语','物理','化学','生物'].forEach(s=>{html+='<td>'+(r[s]!==undefined&&r[s]!==null?r[s]:'—')+'</td>'});html+='<td><b style="color:var(--accent);font-size:14px">'+r.total+'</b></td></tr>'});tbody.innerHTML=html||'<tr><td colspan="10" style="color:var(--dim);padding:30px">暂无数据</td></tr>'})}
+function downloadTemplate(){window.open('/api/template','_blank')}
+let dropZone=document.getElementById('dropZone');dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag')});dropZone.addEventListener('dragleave',e=>{e.preventDefault();dropZone.classList.remove('drag')});dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag');let f=e.dataTransfer.files[0];if(f)handleUpload(f)});
+loadStats();
+</script>
+</body>
+</html>
